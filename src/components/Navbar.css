@@ -19,3 +19,15 @@
   background-color: black;
   color: white;
 }
+
+.show-hover {
+  display: none;
+}
+
+.top-hover:hover .show-hover {
+  display: inline-block;
+}
+
+.top-hover:hover {
+  color: black !important;
+}

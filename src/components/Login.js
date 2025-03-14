@@ -23,25 +23,21 @@ const Login = ({ user, setUser, loginUser }) => {
   };
 
   const onSubmit = async () => {
-    console.log("SUBMITTING");
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const emptyTextRegex = /^\s*$/;
 
     setAlert("");
 
-    console.log("SUBMITTING");
     if (!emailRegex.test(form.email.trim())) {
       setAlert("Please enter a valid Email");
       return;
     }
-    console.log("SUBMITTING");
 
     if (emptyTextRegex.test(form.password.trim())) {
       setAlert("Please enter a Password");
       return;
     }
 
-    console.log("SUBMITTING");
     await loginUser(form.email, form.password);
     if (user?.email && user?.id) {
       setAlert("");

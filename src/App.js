@@ -10,12 +10,21 @@ import ProtectedRoute from "./routing/ProtectedRoute";
 
 import { db } from "./firebase/config";
 import { ref, get } from "firebase/database";
+import ListVehicle from "./components/ListVehicle";
+import RentVehicle from "./components/RentVehicle";
+import Bookings from "./components/Bookings";
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({
+    createdAt: "2025-03-03T18:20:22.537Z",
+    email: "customer@gmail.com",
+    fullname: "Customer",
+    password: "123456",
+    role: "customer",
+    id: "-OKSEEY8MtJRgfawZJPw",
+  });
 
   const loginUser = async (email, password) => {
-    console.log("LOGIN CALLED");
     const dbRef = ref(db, "users");
     const snapshot = await get(dbRef);
     if (snapshot.exists()) {
@@ -43,7 +52,7 @@ function App() {
 
   return (
     <>
-      <Navbar />
+      <Navbar user={user} setUser={setUser} />
       <Routes>
         <Route
           path="/login"
@@ -59,6 +68,14 @@ function App() {
         />
         <Route element={<ProtectedRoute user={user} />}>
           <Route path="/" element={<Home />} />
+        </Route>
+
+        <Route element={<ProtectedRoute user={user} />}>
+          <Route path="/list-vehicle" element={<ListVehicle user={user} />} />
+        </Route>
+
+        <Route element={<ProtectedRoute user={user} />}>
+          <Route path="/rent-vehicle" element={<RentVehicle user={user} />} />
         </Route>
       </Routes>
     </>

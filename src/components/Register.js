@@ -10,6 +10,7 @@ const Register = ({ user, setUser, loginUser }) => {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "", // Added role field
   });
 
   const [alert, setAlert] = useState("");
@@ -32,23 +33,28 @@ const Register = ({ user, setUser, loginUser }) => {
     setAlert("");
 
     if (!form.fullname.trim()) {
-      setAlert("Please enter a User Name");
+      setAlert("Please enter your Full Name.");
       return;
     }
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(form.email.trim())) {
-      setAlert("Please enter a valid Email");
+      setAlert("Please enter a valid Email.");
       return;
     }
 
     if (form.password.length < 6) {
-      setAlert("Password must be at least 6 characters long");
+      setAlert("Password must be at least 6 characters long.");
       return;
     }
 
     if (form.password !== form.confirmPassword) {
-      setAlert("Passwords do not match");
+      setAlert("Passwords do not match.");
+      return;
+    }
+
+    if (!form.role) {
+      setAlert("Please select a Role.");
       return;
     }
 
@@ -58,35 +64,27 @@ const Register = ({ user, setUser, loginUser }) => {
       if (snapshot.exists()) {
         const users = snapshot.val();
 
-        const tempUsers = Object.keys(users)
-          .map((id) => {
-            return {
-              ...users[id],
-              id,
-            };
-          })
-          .filter((user) => {
-            return user.email === form.email;
-          });
+        const existingUser = Object.values(users).find(
+          (user) => user.email === form.email
+        );
 
-        if (tempUsers.length > 0) {
-          setAlert("The email address you entered is already in use. ");
+        if (existingUser) {
+          setAlert("The email address is already in use.");
           return;
         }
       }
 
-      const newDocRef = push(ref(db, "users"));
-      await set(newDocRef, {
+      const newUserRef = push(ref(db, "users"));
+      await set(newUserRef, {
         fullname: form.fullname,
         email: form.email,
         password: form.password,
-        confirmPassword: form.confirmPassword,
+        role: form.role, // Storing user role
+        createdAt: new Date().toISOString(),
       });
 
       await loginUser(form.email, form.password);
-      if (user?.email && user?.id) {
-        setRedirect(true);
-      }
+      setRedirect(true);
     } catch (error) {
       setAlert("Registration failed: " + error.message);
     }
@@ -146,6 +144,15 @@ const Register = ({ user, setUser, loginUser }) => {
               value={form.confirmPassword}
               onChange={onChange}
             />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Role</Form.Label>
+            <Form.Select name="role" value={form.role} onChange={onChange}>
+              <option value="">Select Role</option>
+              <option value="customer">Customer</option>
+              <option value="rental_service">Rental Service</option>
+            </Form.Select>
           </Form.Group>
 
           <Button type="submit" variant="warning" className="w-100">
