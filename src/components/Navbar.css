@@ -1,0 +1,21 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.navbar-brand img {
+  height: 40px;
+}
+
+.btn-outline-dark {
+  border: 2px solid black;
+  color: black;
+  font-weight: bold;
+}
+
+.btn-outline-dark:hover {
+  background-color: black;
+  color: white;
+}
