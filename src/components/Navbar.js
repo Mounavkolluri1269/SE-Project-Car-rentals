@@ -10,6 +10,7 @@ import {
   MdRepeat,
   MdAddCircle,
 } from "react-icons/md";
+import { CgProfile } from "react-icons/cg";
 
 const NavigationBar = ({ user, setUser }) => {
   const location = useLocation();
@@ -92,6 +93,14 @@ const NavigationBar = ({ user, setUser }) => {
                   className="text-white top-hover"
                 >
                   <span className="show-hover">FAQ</span> <MdMessage />
+                </Nav.Link>
+
+                <Nav.Link
+                  as={NavLink}
+                  to="/profile"
+                  className="text-white top-hover"
+                >
+                  <span className="show-hover">Profile</span> <CgProfile />
                 </Nav.Link>
 
                 <Nav.Link

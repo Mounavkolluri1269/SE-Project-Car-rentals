@@ -13,6 +13,7 @@ import { ref, get } from "firebase/database";
 import ListVehicle from "./components/ListVehicle";
 import RentVehicle from "./components/RentVehicle";
 import Bookings from "./components/Bookings";
+import Profile from "./components/Profile";
 
 function App() {
   const [user, setUser] = useState({
@@ -76,6 +77,14 @@ function App() {
 
         <Route element={<ProtectedRoute user={user} />}>
           <Route path="/rent-vehicle" element={<RentVehicle user={user} />} />
+        </Route>
+
+        <Route element={<ProtectedRoute user={user} />}>
+          <Route path="/booking-history" element={<Bookings user={user} />} />
+        </Route>
+
+        <Route element={<ProtectedRoute user={user} />}>
+          <Route path="/profile" element={<Profile user={user} />} />
         </Route>
       </Routes>
     </>
