@@ -8,13 +8,14 @@ import { getDatabase } from "firebase/database";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBRsWpWvbBnRedoOWp_ZENi_nfPE93eaVA",
-  authDomain: "car-rentals-a85ac.firebaseapp.com",
-  projectId: "car-rentals-a85ac",
-  storageBucket: "car-rentals-a85ac.firebasestorage.app",
-  messagingSenderId: "26766024507",
-  appId: "1:26766024507:web:e9e88e595149937875211e",
-  measurementId: "G-VEQBL93G23",
+  apiKey: "AIzaSyCKXQNqhRb9FVwXFsuxWBBWzOFUxPI4C0w",
+  authDomain: "car-rentals-ee0b9.firebaseapp.com",
+  databaseURL: "https://car-rentals-ee0b9-default-rtdb.firebaseio.com",
+  projectId: "car-rentals-ee0b9",
+  storageBucket: "car-rentals-ee0b9.firebasestorage.app",
+  messagingSenderId: "100071742553",
+  appId: "1:100071742553:web:644711e4ce9695931ce548",
+  measurementId: "G-X2DB3T0PBR"
 };
 
 // Initialize Firebase
