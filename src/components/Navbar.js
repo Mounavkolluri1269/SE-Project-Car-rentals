@@ -11,6 +11,7 @@ import {
   MdAddCircle,
 } from "react-icons/md";
 import { CgProfile } from "react-icons/cg";
+import { RiDashboardFill } from "react-icons/ri";
 
 const NavigationBar = ({ user, setUser }) => {
   const location = useLocation();
@@ -50,14 +51,25 @@ const NavigationBar = ({ user, setUser }) => {
             ) : (
               <>
                 {user?.role === "rental_service" ? (
-                  <Nav.Link
-                    as={NavLink}
-                    to="/list-vehicle"
-                    className="text-white top-hover"
-                  >
-                    <span className="show-hover">List a Vehicle</span>{" "}
-                    <MdAddCircle />
-                  </Nav.Link>
+                  <>
+                    <Nav.Link
+                      as={NavLink}
+                      to="/admin-dashboard"
+                      className="text-white top-hover"
+                    >
+                      <span className="show-hover">Admin Dashboard</span>{" "}
+                      <RiDashboardFill />
+                    </Nav.Link>
+
+                    <Nav.Link
+                      as={NavLink}
+                      to="/list-vehicle"
+                      className="text-white top-hover"
+                    >
+                      <span className="show-hover">List a Vehicle</span>{" "}
+                      <MdAddCircle />
+                    </Nav.Link>
+                  </>
                 ) : (
                   <Nav.Link
                     as={NavLink}

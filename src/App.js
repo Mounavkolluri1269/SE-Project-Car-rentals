@@ -14,16 +14,10 @@ import ListVehicle from "./components/ListVehicle";
 import RentVehicle from "./components/RentVehicle";
 import Bookings from "./components/Bookings";
 import Profile from "./components/Profile";
+import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
-  const [user, setUser] = useState({
-    createdAt: "2025-03-03T18:20:22.537Z",
-    email: "customer@gmail.com",
-    fullname: "Customer",
-    password: "123456",
-    role: "customer",
-    id: "-OKSEEY8MtJRgfawZJPw",
-  });
+  const [user, setUser] = useState(null);
 
   const loginUser = async (email, password) => {
     const dbRef = ref(db, "users");
@@ -81,6 +75,13 @@ function App() {
 
         <Route element={<ProtectedRoute user={user} />}>
           <Route path="/booking-history" element={<Bookings user={user} />} />
+        </Route>
+
+        <Route element={<ProtectedRoute user={user} />}>
+          <Route
+            path="/admin-dashboard"
+            element={<AdminDashboard user={user} />}
+          />
         </Route>
 
         <Route element={<ProtectedRoute user={user} />}>

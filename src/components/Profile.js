@@ -51,21 +51,12 @@ const ProfilePage = ({ user }) => {
         style={{ backgroundColor: "#c78b2d", color: "white" }}
       >
         <Row className="align-items-center">
-          <Col xs={2}>
+          <Col xs={1}>
             <FaUserCircle size={50} />
           </Col>
           <Col>
-            <h4>{user.username}</h4>
-            <p>
-              {Array(5)
-                .fill(0)
-                .map((_, index) => (
-                  <FaStar
-                    key={index}
-                    color={index < user.rating ? "gold" : "gray"}
-                  />
-                ))}
-            </p>
+            <h4>{user.fullname}</h4>
+            <h6>{user?.role && user.role}</h6>
           </Col>
         </Row>
       </Card>
