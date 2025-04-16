@@ -9,16 +9,57 @@ import {
   Row,
 } from "react-bootstrap";
 import { db } from "../firebase/config";
-import { ref, get, push, set } from "firebase/database";
+import { ref, get, push, set, child } from "firebase/database";
 import { Navigate } from "react-router-dom";
 
 const RentVehicle = ({ user }) => {
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
-  const [rental, setRental] = useState({ startDate: "", endDate: "" });
+  const [rental, setRental] = useState({
+    startDate: "",
+    endDate: "",
+    discountCode: "",
+  });
   const [alert, setAlert] = useState("");
   const [success, setSuccess] = useState(false);
   const [existingRentals, setExistingRentals] = useState([]);
+
+  const checkOfferExists = async (offerCode) => {
+    try {
+      const offersRef = ref(db, "offers");
+      const snapshot = await get(offersRef);
+
+      if (snapshot.exists()) {
+        const offers = snapshot.val();
+        const matchedOffer = Object.values(offers).find(
+          (offer) => offer.code === offerCode
+        );
+        if (matchedOffer) {
+          if (
+            matchedOffer &&
+            selectedVehicle &&
+            selectedVehicle.price >= matchedOffer.minAmount
+          ) {
+            const discount =
+              (matchedOffer.percentage / 100) * selectedVehicle.price;
+            const finalPrice = selectedVehicle.price - discount;
+            if (!Number.isNaN(finalPrice)) {
+              setSelectedVehicle({
+                ...selectedVehicle,
+                totalPrice: finalPrice,
+              });
+            }
+          }
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } catch (error) {
+      return null;
+    }
+  };
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -43,12 +84,20 @@ const RentVehicle = ({ user }) => {
     fetchRentals();
   }, []);
 
+  useEffect(() => {
+    checkOfferExists(rental.discountCode);
+  }, [rental?.discountCode]);
+
   if (!user || user.role !== "customer") {
     return <Navigate to="/" />;
   }
 
   const handleToggleSelect = (vehicle) => {
-    setSelectedVehicle(selectedVehicle?.id === vehicle.id ? null : vehicle);
+    setSelectedVehicle(
+      selectedVehicle?.id === vehicle.id
+        ? null
+        : { ...vehicle, totalPrice: vehicle.price }
+    );
   };
 
   const isVehicleAvailable = (vehicleId, newStartDate, newEndDate) => {
@@ -90,6 +139,7 @@ const RentVehicle = ({ user }) => {
         vehicleId: selectedVehicle.id,
         startDate: rental.startDate,
         endDate: rental.endDate,
+        finalPrice: selectedVehicle.totalPrice,
       });
       setSuccess(true);
     } catch (error) {
@@ -153,15 +203,29 @@ const RentVehicle = ({ user }) => {
             {selectedVehicle ? (
               <div className="mb-3 p-2 text-center border rounded bg-light">
                 <h5>{selectedVehicle.model}</h5>
-                <p>Make: {selectedVehicle.make}</p>
-                <p>Year: {selectedVehicle.yearBought}</p>
-                <p>Price per day: ${selectedVehicle.price}</p>
+                <p className="p-0 m-0">Make: {selectedVehicle.make}</p>
+                <p className="p-0 m-0">Year: {selectedVehicle.yearBought}</p>
+                <p className="p-0 m-0">
+                  Price per day: ${selectedVehicle.price}
+                </p>
+                <p className="p-0 m-0">
+                  Final Price per day: ${selectedVehicle.totalPrice}
+                </p>
               </div>
             ) : (
               <p className="text-center text-muted">Select a vehicle first.</p>
             )}
 
             <Form>
+              <Form.Group className="mb-3">
+                <Form.Label>Discount Code</Form.Label>
+                <Form.Control
+                  type="text"
+                  onChange={(e) =>
+                    setRental({ ...rental, discountCode: e.target.value })
+                  }
+                />
+              </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label>Start Date</Form.Label>
                 <Form.Control

@@ -5,6 +5,8 @@ import { ref, get } from "firebase/database";
 import { FaCar, FaMapMarkerAlt, FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
+import VehicleTracker from "./VehicleTracker";
+
 const AdminDashboard = ({ user }) => {
   const navigate = useNavigate();
   const [rentedVehicles, setRentedVehicles] = useState([]);
@@ -35,7 +37,7 @@ const AdminDashboard = ({ user }) => {
         Object.values(rentalsData).forEach((rental) => {
           const vehicleId = rental.vehicleId;
           const vehicleName = vehiclesData[vehicleId]?.model || "Unknown Car";
-          const pricePerDay = vehiclesData[vehicleId]?.price || 0;
+          const pricePerDay = rental.finalPrice || 0;
           const rentalDays =
             (new Date(rental.endDate) - new Date(rental.startDate)) /
             (1000 * 60 * 60 * 24);
@@ -66,10 +68,7 @@ const AdminDashboard = ({ user }) => {
     fetchRentalData();
   }, []);
 
-  useEffect(() => {
-    console.log(totalRevenue);
-    console.log(rentedVehicles);
-  }, [totalRevenue, rentedVehicles]);
+  useEffect(() => {}, [totalRevenue, rentedVehicles]);
 
   return (
     <Container className="mt-4">
@@ -145,6 +144,8 @@ const AdminDashboard = ({ user }) => {
           </Card>
         </Col>
       </Row>
+
+      {user && <VehicleTracker user={user} />}
     </Container>
   );
 };

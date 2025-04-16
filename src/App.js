@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import "leaflet/dist/leaflet.css";
+
+import React, { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Home from "./pages/Home";
@@ -13,6 +15,7 @@ import { ref, get } from "firebase/database";
 import ListVehicle from "./components/ListVehicle";
 import RentVehicle from "./components/RentVehicle";
 import Bookings from "./components/Bookings";
+import Discounts from "./components/Discounts";
 import Profile from "./components/Profile";
 import AdminDashboard from "./components/AdminDashboard";
 
@@ -45,6 +48,12 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    if (localStorage.getItem("car-rentals")) {
+      setUser(JSON.parse(localStorage.getItem("car-rentals")));
+    }
+  }, []);
+
   return (
     <>
       <Navbar user={user} setUser={setUser} />
@@ -75,6 +84,10 @@ function App() {
 
         <Route element={<ProtectedRoute user={user} />}>
           <Route path="/booking-history" element={<Bookings user={user} />} />
+        </Route>
+
+        <Route element={<ProtectedRoute user={user} />}>
+          <Route path="/discounts" element={<Discounts user={user} />} />
         </Route>
 
         <Route element={<ProtectedRoute user={user} />}>

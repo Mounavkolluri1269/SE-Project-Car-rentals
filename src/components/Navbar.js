@@ -9,6 +9,7 @@ import {
   MdCloudDownload,
   MdRepeat,
   MdAddCircle,
+  MdDiscount,
 } from "react-icons/md";
 import { CgProfile } from "react-icons/cg";
 import { RiDashboardFill } from "react-icons/ri";
@@ -22,6 +23,7 @@ const NavigationBar = ({ user, setUser }) => {
     localStorage.removeItem("car-rentals");
     setUser(null);
     navigate("/login");
+    window.location.reload();
   };
 
   return (
@@ -88,6 +90,14 @@ const NavigationBar = ({ user, setUser }) => {
                 >
                   <span className="show-hover">Booking History</span>{" "}
                   <MdRepeat />
+                </Nav.Link>
+
+                <Nav.Link
+                  as={NavLink}
+                  to="/discounts"
+                  className="text-white top-hover"
+                >
+                  <span className="show-hover">Discounts</span> <MdDiscount />
                 </Nav.Link>
 
                 <Nav.Link
