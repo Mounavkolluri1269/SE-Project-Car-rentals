@@ -98,17 +98,8 @@ const NavigationBar = ({ user, setUser }) => {
                   to="/booking-history"
                   className="text-white top-hover"
                 >
-                  <span className="show-hover">Booking History</span>{" "}
+                  <span className="show-hover">Booking History</span>
                   <MdRepeat />
-                </Nav.Link>
-
-                <Nav.Link
-                  as={NavLink}
-                  to="/invoice"
-                  className="text-white top-hover"
-                >
-                  <span className="show-hover">Invoice</span>{" "}
-                  <MdCloudDownload />
                 </Nav.Link>
 
                 <Nav.Link

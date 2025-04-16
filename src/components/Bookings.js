@@ -48,7 +48,7 @@ const BookingHistory = ({ user }) => {
         );
 
         data = data.filter((booking) => booking.userId === user.id);
-        setBookings(data.reverse()); // Show latest first
+        setBookings(data.reverse());
       }
     };
 

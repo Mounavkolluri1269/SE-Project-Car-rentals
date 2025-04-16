@@ -17,6 +17,7 @@ import RentVehicle from "./components/RentVehicle";
 import Bookings from "./components/Bookings";
 import Discounts from "./components/Discounts";
 import Profile from "./components/Profile";
+import FAQ from "./components/FAQ";
 import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
@@ -95,6 +96,10 @@ function App() {
             path="/admin-dashboard"
             element={<AdminDashboard user={user} />}
           />
+        </Route>
+
+        <Route element={<ProtectedRoute user={user} />}>
+          <Route path="/faq" element={<FAQ user={user} />} />
         </Route>
 
         <Route element={<ProtectedRoute user={user} />}>
