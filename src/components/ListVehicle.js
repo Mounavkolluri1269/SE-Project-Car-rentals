@@ -14,6 +14,8 @@ import { db } from "../firebase/config";
 import { ref, push, set, get, remove } from "firebase/database";
 import { Modal } from "react-bootstrap";
 import VehicleReviews from "./VehicleReviews";
+import { MdMap } from "react-icons/md";
+import VehicleLocationMap from "./VehicleLocationMap";
 
 const ListVehicle = ({ user }) => {
   const navigate = useNavigate();
@@ -28,6 +30,8 @@ const ListVehicle = ({ user }) => {
   const [editingVehicleId, setEditingVehicleId] = useState(null);
   const [showReviews, setShowReviews] = useState(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [selectedMapVehicle, setSelectedMapVehicle] = useState(null);
 
   if (!user || user?.role !== "rental_service") {
     navigate("/");
@@ -148,6 +152,14 @@ const ListVehicle = ({ user }) => {
                         className="me-2"
                         size={20}
                       />
+                      <MdMap
+                        onClick={() => {
+                          setSelectedMapVehicle(vehicle.id);
+                          setShowMap(true);
+                        }}
+                        className="me-2"
+                        size={20}
+                      />
                       <MdOutlineStarPurple500
                         onClick={() => handleReviews(vehicle.id)}
                         className="me-2"
@@ -232,6 +244,18 @@ const ListVehicle = ({ user }) => {
         </Modal.Header>
         <Modal.Body>
           {showReviews && <VehicleReviews vehicleId={showReviews} />}
+        </Modal.Body>
+      </Modal>
+
+      {/* Map Model */}
+      <Modal show={showMap} onHide={() => setShowMap(false)} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Live Vehicle Location</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedMapVehicle && (
+            <VehicleLocationMap vehicleId={selectedMapVehicle} />
+          )}
         </Modal.Body>
       </Modal>
     </Container>

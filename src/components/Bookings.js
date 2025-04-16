@@ -14,6 +14,11 @@ import { FaCar, FaRedo, FaFileAlt, FaStar } from "react-icons/fa";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import Invoice from "./Invoice";
 import ReviewForm from "./ReviewForm";
+import { MdOutlineStarPurple500 } from "react-icons/md";
+import VehicleReviews from "./VehicleReviews";
+import { MdMap } from "react-icons/md";
+import VehicleLocationMap from "./VehicleLocationMap";
+import LiveLocationTracker from "./LiveLocationTracker";
 
 const BookingHistory = ({ user }) => {
   const [bookings, setBookings] = useState([]);
@@ -24,6 +29,12 @@ const BookingHistory = ({ user }) => {
   const [newEndDate, setNewEndDate] = useState("");
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showReviews, setShowReviews] = useState(null);
+  const [showReviewModalForRental, setShowReviewModalForRental] =
+    useState(false);
+  const [users, setUsers] = useState(null);
+  const [showMap, setShowMap] = useState(false);
+  const [selectedMapVehicle, setSelectedMapVehicle] = useState(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -35,8 +46,17 @@ const BookingHistory = ({ user }) => {
       const vehiclesRef = ref(db, "vehicles");
       const vehiclesSnapshot = await get(vehiclesRef);
 
+      let vehicleData = null;
       if (vehiclesSnapshot.exists()) {
+        vehicleData = vehiclesSnapshot.val();
         setVehicles(vehiclesSnapshot.val());
+      }
+
+      const usersRef = ref(db, "users");
+      const usersSnapshot = await get(usersRef);
+
+      if (usersSnapshot.exists()) {
+        setUsers(usersSnapshot.val());
       }
 
       if (bookingsSnapshot.exists()) {
@@ -47,7 +67,11 @@ const BookingHistory = ({ user }) => {
           })
         );
 
-        data = data.filter((booking) => booking.userId === user.id);
+        data = data.filter(
+          (booking) =>
+            booking.userId === user.id ||
+            vehicleData[booking.vehicleId]?.owner_id === user.id
+        );
         setBookings(data.reverse());
       }
     };
@@ -104,6 +128,24 @@ const BookingHistory = ({ user }) => {
     setShowReviewModal(true);
   };
 
+  const handleReviewForRental = (vehicleId) => {
+    setShowReviews(vehicleId);
+    setShowReviewModalForRental(true);
+  };
+
+  const isTodayInRange = (startDate, endDate) => {
+    const today = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Normalize times to ignore time part
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    today.setHours(12, 0, 0, 0); // Midday to avoid timezone issues
+
+    return today >= start && today <= end;
+  };
+
   return (
     <Container className="mt-4">
       <h4 className="mb-3" style={{ fontWeight: "bold" }}>
@@ -131,20 +173,44 @@ const BookingHistory = ({ user }) => {
                     </p>
                   </Col>
                   <Col xs={3} className="text-end">
-                    <FaRedo
+                    {user?.role === "customer" && (
+                      <FaRedo
+                        size={20}
+                        className="me-3"
+                        title="Rebook"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => handleRebook(booking.vehicleId)}
+                      />
+                    )}
+
+                    <MdMap
+                      onClick={() => {
+                        setSelectedMapVehicle(booking.vehicleId);
+                        setShowMap(true);
+                      }}
+                      className="me-2"
                       size={20}
-                      className="me-3"
-                      title="Rebook"
-                      style={{ cursor: "pointer" }}
-                      onClick={() => handleRebook(booking.vehicleId)}
                     />
+
+                    {isTodayInRange(booking.startDate, booking.endDate) && (
+                      <LiveLocationTracker
+                        user={user}
+                        vehicleId={booking.vehicleId}
+                      />
+                    )}
 
                     <PDFDownloadLink
                       document={
                         <Invoice
                           booking={booking}
                           vehicle={vehicles[booking.vehicleId]}
-                          user={user}
+                          renterName={
+                            users[booking.userId]?.fullname || "Unknown User"
+                          }
+                          ownerName={
+                            users[vehicles[booking.vehicleId].owner_id]
+                              ?.fullname || "Unknown Owner"
+                          }
                         />
                       }
                       fileName={`Invoice-${booking.id}.pdf`}
@@ -163,12 +229,41 @@ const BookingHistory = ({ user }) => {
                       }
                     </PDFDownloadLink>
 
-                    <FaStar
-                      size={20}
-                      title="Add Review"
-                      style={{ cursor: "pointer" }}
-                      onClick={() => handleReview(booking)}
-                    />
+                    {user?.role === "customer" && (
+                      <FaStar
+                        size={20}
+                        title="Add Review"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => handleReview(booking)}
+                      />
+                    )}
+
+                    {user?.role === "rental_service" && (
+                      <>
+                        <MdOutlineStarPurple500
+                          onClick={() =>
+                            handleReviewForRental(booking.vehicleId)
+                          }
+                          className="me-2"
+                          size={20}
+                        />
+                        <Modal
+                          show={showReviewModalForRental}
+                          onHide={() => setShowReviewModalForRental(false)}
+                          size="lg"
+                          centered
+                        >
+                          <Modal.Header closeButton>
+                            <Modal.Title>Vehicle Reviews</Modal.Title>
+                          </Modal.Header>
+                          <Modal.Body>
+                            {showReviews && (
+                              <VehicleReviews vehicleId={showReviews} />
+                            )}
+                          </Modal.Body>
+                        </Modal>
+                      </>
+                    )}
                   </Col>
                 </Row>
               </Card>
@@ -226,6 +321,18 @@ const BookingHistory = ({ user }) => {
             vehicle={vehicles[selectedBooking?.vehicleId]}
             onClose={() => setShowReviewModal(false)}
           />
+        </Modal.Body>
+      </Modal>
+
+      {/* Map Modal */}
+      <Modal show={showMap} onHide={() => setShowMap(false)} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Live Vehicle Location</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedMapVehicle && (
+            <VehicleLocationMap vehicleId={selectedMapVehicle} />
+          )}
         </Modal.Body>
       </Modal>
     </Container>

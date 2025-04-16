@@ -7,10 +7,13 @@ import {
   Alert,
   Col,
   Row,
+  Modal,
 } from "react-bootstrap";
 import { db } from "../firebase/config";
 import { ref, get, push, set, child } from "firebase/database";
 import { Navigate } from "react-router-dom";
+import { MdMap } from "react-icons/md";
+import VehicleLocationMap from "./VehicleLocationMap";
 
 const RentVehicle = ({ user }) => {
   const [vehicles, setVehicles] = useState([]);
@@ -23,6 +26,8 @@ const RentVehicle = ({ user }) => {
   const [alert, setAlert] = useState("");
   const [success, setSuccess] = useState(false);
   const [existingRentals, setExistingRentals] = useState([]);
+  const [showMap, setShowMap] = useState(false);
+  const [selectedMapVehicle, setSelectedMapVehicle] = useState(null);
 
   const checkOfferExists = async (offerCode) => {
     try {
@@ -184,6 +189,29 @@ const RentVehicle = ({ user }) => {
                 >
                   {selectedVehicle?.id === vehicle.id ? "Selected" : "Select"}
                 </Button>
+                <MdMap
+                  onClick={() => {
+                    setSelectedMapVehicle(vehicle.id);
+                    setShowMap(true);
+                  }}
+                  className="me-2"
+                  size={20}
+                />
+                <Modal
+                  show={showMap}
+                  onHide={() => setShowMap(false)}
+                  size="lg"
+                  centered
+                >
+                  <Modal.Header closeButton>
+                    <Modal.Title>Live Vehicle Location</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    {selectedMapVehicle && (
+                      <VehicleLocationMap vehicleId={selectedMapVehicle} />
+                    )}
+                  </Modal.Body>
+                </Modal>
               </Card.Body>
             </Card>
           ))}
