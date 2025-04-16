@@ -8,9 +8,12 @@ import {
   Card,
   Alert,
 } from "react-bootstrap";
+import { MdEdit, MdDelete, MdOutlineStarPurple500 } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import { db } from "../firebase/config"; // Ensure Firebase is configured
-import { ref, push, set, get } from "firebase/database";
+import { db } from "../firebase/config";
+import { ref, push, set, get, remove } from "firebase/database";
+import { Modal } from "react-bootstrap";
+import VehicleReviews from "./VehicleReviews";
 
 const ListVehicle = ({ user }) => {
   const navigate = useNavigate();
@@ -22,37 +25,39 @@ const ListVehicle = ({ user }) => {
     price: "",
   });
   const [alert, setAlert] = useState("");
+  const [editingVehicleId, setEditingVehicleId] = useState(null);
+  const [showReviews, setShowReviews] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   if (!user || user?.role !== "rental_service") {
     navigate("/");
   }
 
-  // Fetch existing vehicles
-  useEffect(() => {
-    const fetchVehicles = async () => {
-      try {
-        const dbRef = ref(db, "vehicles");
-        const snapshot = await get(dbRef);
-        if (snapshot.exists()) {
-          setVehicles(
-            Object.values(snapshot.val()).filter(
-              (vehicles) => vehicles.owner_id === user?.id
-            )
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching vehicles:", error);
+  // Fetch vehicles
+  const fetchVehicles = async () => {
+    try {
+      const dbRef = ref(db, "vehicles");
+      const snapshot = await get(dbRef);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const filtered = Object.entries(data)
+          .map(([id, vehicle]) => ({ id, ...vehicle }))
+          .filter((vehicle) => vehicle.owner_id === user?.id);
+        setVehicles(filtered);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchVehicles();
   }, []);
 
-  // Handle form input changes
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
   const onSubmit = async (e) => {
     e.preventDefault();
     setAlert("");
@@ -63,48 +68,104 @@ const ListVehicle = ({ user }) => {
     }
 
     try {
-      const newVehicleRef = push(ref(db, "vehicles"));
-      await set(newVehicleRef, {
-        model: form.model,
-        make: form.make,
-        yearBought: form.yearBought,
-        price: form.price,
-        owner_id: user?.id,
-      });
+      if (editingVehicleId) {
+        const vehicleRef = ref(db, `vehicles/${editingVehicleId}`);
+        await set(vehicleRef, {
+          ...form,
+          owner_id: user?.id,
+        });
+        setAlert("✅ Vehicle updated!");
+      } else {
+        const newVehicleRef = push(ref(db, "vehicles"));
+        await set(newVehicleRef, {
+          ...form,
+          owner_id: user?.id,
+        });
+        setAlert("✅ Vehicle added!");
+      }
 
-      setVehicles([...vehicles, form]);
       setForm({ model: "", make: "", yearBought: "", price: "" });
+      setEditingVehicleId(null);
+      fetchVehicles(); // Refresh after add/edit
     } catch (error) {
-      setAlert("Error adding vehicle: " + error.message);
+      setAlert("Error saving vehicle: " + error.message);
     }
+  };
+
+  const handleEdit = (vehicleId) => {
+    const vehicle = vehicles.find((v) => v.id === vehicleId);
+    setForm({
+      model: vehicle.model,
+      make: vehicle.make,
+      yearBought: vehicle.yearBought,
+      price: vehicle.price,
+    });
+    setEditingVehicleId(vehicleId);
+  };
+
+  const handleDelete = async (vehicleId) => {
+    try {
+      const vehicleRef = ref(db, `vehicles/${vehicleId}`);
+      await remove(vehicleRef);
+      setAlert("✅ Vehicle deleted!");
+      setVehicles((prev) => prev.filter((v) => v.id !== vehicleId));
+    } catch (error) {
+      setAlert("Error deleting vehicle: " + error.message);
+    }
+  };
+
+  const handleReviews = (vehicleId) => {
+    setShowReviews(vehicleId);
+    setShowReviewModal(true);
   };
 
   return (
     <Container className="mt-4">
       <Row>
-        {/* Left Side - Vehicle List */}
         <Col md={6}>
           <h4>List a Vehicle</h4>
-          {vehicles?.length === 0 && (
+          {vehicles.length === 0 && (
             <Alert variant="danger">No Listed Vehicles available!</Alert>
           )}
           {vehicles.map((vehicle, index) => (
-            <Card key={index} className="mb-3 p-3 bg-warning">
+            <Card key={vehicle.id} className="mb-3 p-3 bg-warning">
               <Card.Body>
                 <Card.Title>{vehicle.model}</Card.Title>
                 <Card.Text>
-                  {vehicle.make} - {vehicle.yearBought} <br />
-                  Price: ${vehicle.price}
+                  <Row>
+                    <Col xs={6}>
+                      {vehicle.make} - {vehicle.yearBought} <br />
+                      Price: ${vehicle.price}
+                    </Col>
+                    <Col xs={6} className="d-flex justify-content-end">
+                      <MdEdit
+                        onClick={() => handleEdit(vehicle.id)}
+                        className="me-2"
+                        size={20}
+                      />
+                      <MdDelete
+                        onClick={() => handleDelete(vehicle.id)}
+                        className="me-2"
+                        size={20}
+                      />
+                      <MdOutlineStarPurple500
+                        onClick={() => handleReviews(vehicle.id)}
+                        className="me-2"
+                        size={20}
+                      />
+                    </Col>
+                  </Row>
                 </Card.Text>
               </Card.Body>
             </Card>
           ))}
         </Col>
 
-        {/* Right Side - Add New Vehicle */}
         <Col md={6}>
           <Card className="p-4">
-            <h4 className="text-center">Add New Vehicle</h4>
+            <h4 className="text-center">
+              {editingVehicleId ? "Edit Vehicle" : "Add New Vehicle"}
+            </h4>
             {alert && <Alert variant="danger">{alert}</Alert>}
             <Form onSubmit={onSubmit}>
               <Form.Group className="mb-3">
@@ -152,12 +213,27 @@ const ListVehicle = ({ user }) => {
               </Form.Group>
 
               <Button type="submit" variant="dark" className="w-100">
-                ADD
+                {editingVehicleId ? "Update Vehicle" : "Add Vehicle"}
               </Button>
             </Form>
           </Card>
         </Col>
       </Row>
+
+      {/* Review Modal */}
+      <Modal
+        show={showReviewModal}
+        onHide={() => setShowReviewModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Vehicle Reviews</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {showReviews && <VehicleReviews vehicleId={showReviews} />}
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };

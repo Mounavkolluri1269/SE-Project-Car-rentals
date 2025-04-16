@@ -10,7 +10,8 @@ import {
 } from "react-bootstrap";
 import { db } from "../firebase/config";
 import { ref, get, push } from "firebase/database";
-import { FaCar, FaRedo, FaFileAlt } from "react-icons/fa";
+import { FaCar, FaRedo, FaFileAlt, FaStar } from "react-icons/fa";
+import ReviewForm from "./ReviewForm";
 
 const BookingHistory = ({ user }) => {
   const [bookings, setBookings] = useState([]);
@@ -19,6 +20,9 @@ const BookingHistory = ({ user }) => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [newStartDate, setNewStartDate] = useState("");
   const [newEndDate, setNewEndDate] = useState("");
+
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewVehicleId, setReviewVehicleId] = useState(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -63,7 +67,6 @@ const BookingHistory = ({ user }) => {
       return;
     }
 
-    // Check if vehicle is available
     const bookingsRef = ref(db, "rentals");
     const bookingsSnapshot = await get(bookingsRef);
 
@@ -81,7 +84,6 @@ const BookingHistory = ({ user }) => {
       }
     }
 
-    // Add new booking
     const newBookingRef = ref(db, "rentals");
     await push(newBookingRef, {
       vehicleId: selectedVehicle,
@@ -99,7 +101,6 @@ const BookingHistory = ({ user }) => {
 
   return (
     <Container className="mt-4">
-      {/* Title */}
       <h4 className="mb-3" style={{ fontWeight: "bold" }}>
         📌 Booking History
       </h4>
@@ -127,12 +128,25 @@ const BookingHistory = ({ user }) => {
                   <Col xs={3} className="text-end">
                     <FaRedo
                       size={20}
-                      className="me-3"
+                      className="me-2"
                       title="Rebook"
                       style={{ cursor: "pointer" }}
                       onClick={() => handleRebook(booking.vehicleId)}
                     />
-                    <FaFileAlt size={20} title="View Invoice" />
+                    <FaFileAlt
+                      size={20}
+                      className="me-2"
+                      title="View Invoice"
+                    />
+                    <FaStar
+                      size={20}
+                      title="Add Review"
+                      style={{ cursor: "pointer", color: "gold" }}
+                      onClick={() => {
+                        setReviewVehicleId(booking.vehicleId);
+                        setShowReviewModal(true);
+                      }}
+                    />
                   </Col>
                 </Row>
               </Card>
@@ -176,6 +190,20 @@ const BookingHistory = ({ user }) => {
             Confirm Rebook
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* Review Modal */}
+      <Modal show={showReviewModal} onHide={() => setShowReviewModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>⭐ Add Review</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ReviewForm
+            userId={user?.id}
+            vehicleId={reviewVehicleId}
+            onClose={() => setShowReviewModal(false)}
+          />
+        </Modal.Body>
       </Modal>
     </Container>
   );

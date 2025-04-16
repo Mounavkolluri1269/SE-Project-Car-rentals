@@ -84,23 +84,14 @@ const AdminDashboard = ({ user }) => {
                   className="p-2 mb-2"
                   style={{ backgroundColor: "#c78b2d", color: "white" }}
                 >
-                  <Row className="align-items-center">
+                  <Row className="align-items-center pt-2 pb-0">
+                    <Col xs={2}></Col>
                     <Col xs={2}>
                       <FaCar size={20} />
                     </Col>
                     <Col>
                       <strong>{vehicle.name}</strong>
                       <p>Rented {vehicle.count} times</p>
-                    </Col>
-                    <Col xs={3} className="text-end">
-                      <FaMapMarkerAlt
-                        size={18}
-                        className="me-2"
-                        title="View Location"
-                      />
-                      <FaEye size={18} className="me-2" title="View Details" />
-                      <FaEdit size={18} className="me-2" title="Edit" />
-                      <FaTrash size={18} title="Delete" />
                     </Col>
                   </Row>
                 </Card>
@@ -136,7 +127,7 @@ const AdminDashboard = ({ user }) => {
                     <strong>Total:</strong>
                   </td>
                   <td>
-                    <strong>${totalRevenue.total?.toFixed(2)}</strong>
+                    <strong>${totalRevenue.total?.toFixed(2) || 0}</strong>
                   </td>
                 </tr>
               </tbody>

@@ -10,6 +10,7 @@ import {
   MdRepeat,
   MdAddCircle,
   MdDiscount,
+  MdOutlineStarPurple500,
 } from "react-icons/md";
 import { CgProfile } from "react-icons/cg";
 import { RiDashboardFill } from "react-icons/ri";
@@ -71,6 +72,15 @@ const NavigationBar = ({ user, setUser }) => {
                       <span className="show-hover">List a Vehicle</span>{" "}
                       <MdAddCircle />
                     </Nav.Link>
+
+                    <Nav.Link
+                      as={NavLink}
+                      to="/discounts"
+                      className="text-white top-hover"
+                    >
+                      <span className="show-hover">Discounts</span>{" "}
+                      <MdDiscount />
+                    </Nav.Link>
                   </>
                 ) : (
                   <Nav.Link
@@ -90,14 +100,6 @@ const NavigationBar = ({ user, setUser }) => {
                 >
                   <span className="show-hover">Booking History</span>{" "}
                   <MdRepeat />
-                </Nav.Link>
-
-                <Nav.Link
-                  as={NavLink}
-                  to="/discounts"
-                  className="text-white top-hover"
-                >
-                  <span className="show-hover">Discounts</span> <MdDiscount />
                 </Nav.Link>
 
                 <Nav.Link
