@@ -11,6 +11,8 @@ import {
 import { db } from "../firebase/config";
 import { ref, get, push } from "firebase/database";
 import { FaCar, FaRedo, FaFileAlt, FaStar } from "react-icons/fa";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import Invoice from "./Invoice";
 import ReviewForm from "./ReviewForm";
 
 const BookingHistory = ({ user }) => {
@@ -20,9 +22,8 @@ const BookingHistory = ({ user }) => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [newStartDate, setNewStartDate] = useState("");
   const [newEndDate, setNewEndDate] = useState("");
-
   const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewVehicleId, setReviewVehicleId] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -54,13 +55,12 @@ const BookingHistory = ({ user }) => {
     fetchBookings();
   }, [user]);
 
-  // Open Rebook Modal
+  // Rebooking logic
   const handleRebook = (vehicleId) => {
     setSelectedVehicle(vehicleId);
     setShowRebookModal(true);
   };
 
-  // Handle Rebooking
   const confirmRebook = async () => {
     if (!newStartDate || !newEndDate) {
       alert("Please select valid dates.");
@@ -99,6 +99,11 @@ const BookingHistory = ({ user }) => {
     window.location.reload(); // Refresh the booking list
   };
 
+  const handleReview = (booking) => {
+    setSelectedBooking(booking);
+    setShowReviewModal(true);
+  };
+
   return (
     <Container className="mt-4">
       <h4 className="mb-3" style={{ fontWeight: "bold" }}>
@@ -128,24 +133,41 @@ const BookingHistory = ({ user }) => {
                   <Col xs={3} className="text-end">
                     <FaRedo
                       size={20}
-                      className="me-2"
+                      className="me-3"
                       title="Rebook"
                       style={{ cursor: "pointer" }}
                       onClick={() => handleRebook(booking.vehicleId)}
                     />
-                    <FaFileAlt
-                      size={20}
-                      className="me-2"
-                      title="View Invoice"
-                    />
+
+                    <PDFDownloadLink
+                      document={
+                        <Invoice
+                          booking={booking}
+                          vehicle={vehicles[booking.vehicleId]}
+                          user={user}
+                        />
+                      }
+                      fileName={`Invoice-${booking.id}.pdf`}
+                    >
+                      {({ loading }) =>
+                        loading ? (
+                          "Loading..."
+                        ) : (
+                          <FaFileAlt
+                            size={20}
+                            className="me-3"
+                            title="Download Invoice"
+                            style={{ cursor: "pointer" }}
+                          />
+                        )
+                      }
+                    </PDFDownloadLink>
+
                     <FaStar
                       size={20}
                       title="Add Review"
-                      style={{ cursor: "pointer", color: "gold" }}
-                      onClick={() => {
-                        setReviewVehicleId(booking.vehicleId);
-                        setShowReviewModal(true);
-                      }}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleReview(booking)}
                     />
                   </Col>
                 </Row>
@@ -199,8 +221,9 @@ const BookingHistory = ({ user }) => {
         </Modal.Header>
         <Modal.Body>
           <ReviewForm
-            userId={user?.id}
-            vehicleId={reviewVehicleId}
+            booking={selectedBooking}
+            user={user}
+            vehicle={vehicles[selectedBooking?.vehicleId]}
             onClose={() => setShowReviewModal(false)}
           />
         </Modal.Body>
