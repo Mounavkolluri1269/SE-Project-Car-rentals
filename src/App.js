@@ -72,7 +72,7 @@ function App() {
           }
         />
         <Route element={<ProtectedRoute user={user} />}>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home user={user} />} />
         </Route>
 
         <Route element={<ProtectedRoute user={user} />}>
