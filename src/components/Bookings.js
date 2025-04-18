@@ -319,7 +319,7 @@ const BookingHistory = ({ user }) => {
             booking={selectedBooking}
             user={user}
 userId={user?.id || user?.uid}
-            vehicle={vehicles[selectedBooking?.vehicleId]}
+            vehicleId={vehicles[selectedBooking?.vehicleId]}
             onClose={() => setShowReviewModal(false)}
           />
         </Modal.Body>
