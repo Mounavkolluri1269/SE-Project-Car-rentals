@@ -47,7 +47,7 @@ const ReviewForm = ({ userId, vehicleId, onClose }) => {
         />
       </Form.Group>
 
-      <Button variant="success" type="submit">
+      <Button variant="success" type="submit" onClick={handleSubmit}>
         Submit Review
       </Button>
     </Form>
