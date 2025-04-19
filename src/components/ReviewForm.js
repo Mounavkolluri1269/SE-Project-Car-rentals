@@ -7,6 +7,8 @@ const ReviewForm = ({ userId, vehicleId, onClose }) => {
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(5);
 
+  console.log(vehicleId);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!review || rating < 1 || rating > 5) return;

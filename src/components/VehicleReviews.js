@@ -4,12 +4,14 @@ import { ref, get } from "firebase/database";
 import { db } from "../firebase/config";
 
 const VehicleReviews = ({ vehicleId }) => {
+  console.log(vehicleId);
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     const fetchReviews = async () => {
       const snapshot = await get(ref(db, "reviews"));
       if (snapshot.exists()) {
+        console.log(snapshot.val());
         const data = Object.values(snapshot.val()).filter(
           (review) => review.vehicleId === vehicleId
         );

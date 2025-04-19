@@ -318,8 +318,8 @@ const BookingHistory = ({ user }) => {
           <ReviewForm
             booking={selectedBooking}
             user={user}
-userId={user?.id || user?.uid}
-            vehicleId={vehicles[selectedBooking?.vehicleId]}
+            userId={user?.id || user?.uid}
+            vehicleId={selectedBooking?.vehicleId}
             onClose={() => setShowReviewModal(false)}
           />
         </Modal.Body>
